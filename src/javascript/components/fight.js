@@ -8,30 +8,34 @@ export async function fight(firstFighter, secondFighter) {
     const rightHealthBar = document.querySelector('#right-fighter-indicator');
     rightHealthBar.style.width = '100%';
 
-    const keyCombo = [];
-
     const state = {
       leftFighter: {
         ...firstFighter,
         isBlocking: false,
-        ultimateCooldown: false
+        ultimateCooldown: false,
+        keyCombination: []
       },
       rightFighter: {
         ...secondFighter,
         isBlocking: false,
-        ultimateCooldown: false
+        ultimateCooldown: false,
+        keyCombination: []
       }
     };
 
     document.addEventListener('keydown', (event) => {
       if (!event.repeat) {
-        if (!keyCombo.includes(event.code)) keyCombo.push(event.code);
+        if (controls.PlayerOneCriticalHitCombination.includes(event.code))
+          state.leftFighter.keyCombination.push(event.code);
 
-        if (comboCheck(keyCombo, controls.PlayerOneCriticalHitCombination)) {
+        if (controls.PlayerTwoCriticalHitCombination.includes(event.code))
+          state.rightFighter.keyCombination.push(event.code);
+
+        if (state.leftFighter.keyCombination.length === 3) {
           fightLogic({ type: controls.PlayerOneCriticalHitCombination });
         }
 
-        if (comboCheck(keyCombo, controls.PlayerTwoCriticalHitCombination)) {
+        if (state.rightFighter.keyCombination.length === 3) {
           fightLogic({ type: controls.PlayerTwoCriticalHitCombination });
         }
 
@@ -42,7 +46,11 @@ export async function fight(firstFighter, secondFighter) {
     });
 
     document.addEventListener('keyup', (event) => {
-      keyCombo.splice(keyCombo.indexOf(event.code));
+      if (state.leftFighter.keyCombination.includes(event.code))
+        state.leftFighter.keyCombination.splice(state.leftFighter.keyCombination.indexOf(event.code), 1);
+      if (state.rightFighter.keyCombination.includes(event.code))
+        state.rightFighter.keyCombination.splice(state.rightFighter.keyCombination.indexOf(event.code), 1);
+
       defenseLogic({ type: event.code });
     });
 
@@ -102,10 +110,6 @@ export async function fight(firstFighter, secondFighter) {
       setTimeout(() => {
         fighter.ultimateCooldown = false;
       }, 10000);
-    };
-
-    const comboCheck = (keys, combo) => {
-      return keys.every((key) => combo.includes(key)) && combo.every((key) => keys.includes(key));
     };
 
     const onHpChange = () => {
