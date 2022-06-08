@@ -19,7 +19,7 @@ class FighterService {
       const fighterDetails = await callApi(`details/fighter/${id}.json`);
       return fighterDetails;
     } catch (error) {
-      console.error(error);
+      throw error;
     }
   }
 }
